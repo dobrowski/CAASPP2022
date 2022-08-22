@@ -111,13 +111,15 @@ ggsave(here("figs", paste0("CAASPP ELA Rates Meeting or Exceeding at Salinas Uni
 
 
 
-lolli.subgroups <- function(dist) {
+lolli.subgroups <- function(dist, test.id = 1) {
 
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
 caaspp.mry %>%
     filter(Grade == 13,
            str_detect(District_Name,dist),
            # Subgroup_ID == "1",
-           Test_Id == 1, # ELA 
+           Test_Id == test.id, # ELA 
            Entity_Type == "District",
            !is.na(Percentage_Standard_Met_and_Above),
            !str_detect(Subgroup, " - ")
@@ -128,24 +130,31 @@ caaspp.mry %>%
     labs(x = "",
          y = "",
          color ="",
-         title = paste0("CAASPP ELA Rates Meeting or Exceeding at ",dist," by Student Group"),
+         title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding at ",dist," by Student Group"),
          caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+
+
+ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
+       width = 8, height = 6)
 
 }
 
-lolli.subgroups("South Monterey County")
+lolli.subgroups("South Monterey County", 2)
 
 
 lolli.subgroups("Carmel")
 
 
-lolli.schools <- function(dist) {
+lolli.schools <- function(dist, test.id = 1) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
     
     caaspp.mry %>%
         filter(Grade == 13,
                str_detect(District_Name,dist),
                Subgroup_ID == "1",
-               Test_Id == 1, # ELA 
+               Test_Id == test.id, # ELA 
                Entity_Type == "School",
                !is.na(Percentage_Standard_Met_and_Above)
         )%>%
@@ -155,15 +164,20 @@ lolli.schools <- function(dist) {
         labs(x = "",
              y = "",
              color ="",
-             title = ("CAASPP ELA Rates Meeting or Exceeding by 11th grade"),
+             title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding at ",dist," by School"),
              caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+    
+
+ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by School ",  Sys.Date(),".png" )),
+       width = 8, height = 6)
+
     
 }
 
-lolli.schools("Salinas City")
+lolli.schools("Salinas City", 2)
 
 
-lolli.schools("Alisal")
+lolli.schools("Alisal", 1)
 
 
 
@@ -234,14 +248,14 @@ ggplot(data = caaspp.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Ab
          y = "Percent Meeting or Exceeding Standard by Grade",
          x = "")
 
-### Overlapping bars ---
+### Overlapping bars ----
 
 
 caaspp.long <- caaspp.mry %>%
     bind_rows(caaspp.mry2019) %>%
     filter(Grade == 13,
            Subgroup_ID == "1",
-           Test_Id == 2, # ELA 
+           Test_Id == 2, # Math 
            School_Code == "0000000",
            # !is.na(Percentage_Standard_Met_and_Above)
     )
@@ -267,8 +281,14 @@ caaspp.long2 <- caaspp.long %>%
         theme_hc() + 
         labs(title = "CAASPP Math Percent Meet and Exceed by District",
              subtitle = "Grey is 2019 and Dark Green is 2022",
-             y = "")
+             y = "",
+             x = "",
+             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
         
+    
+    ggsave(here("figs", paste0("All Districts Math compared 2019 ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
+    
 
     # ELA version
     
@@ -302,7 +322,13 @@ caaspp.long2 <- caaspp.long %>%
         coord_flip() + 
         theme_hc() + 
         labs(title = "CAASPP ELA Percent Meet and Exceed by District",
-             subtitle = "Grey is 2019 and Dark Blue is 2022",
-             y = "")
+             subtitle = "Grey is 2019 and Dark Green is 2022",
+             y = "",
+             x = "",
+             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+    
+    
+    ggsave(here("figs", paste0("All Districts ELA compared 2019 ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
     
     

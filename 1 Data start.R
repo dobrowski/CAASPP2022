@@ -23,6 +23,34 @@ ent <- vroom(here("data","sb_ca2022entities_csv.txt"),
 )
 
 
+districts <- c("Carmel",
+               "Pacific Grove",
+               "Graves",
+               "Washington",
+               "Lagunita",
+               "Spreckels",
+               "South Monterey",
+               "Chualar",
+               "Mission",
+               "San Antonio",
+               "Santa Rita",
+               "Salinas Union",
+               "Alisal",
+               "Monterey Peninsula",
+               "North Monterey",
+               "San Lucas",
+               "Salinas City",
+               "Soledad",
+               "King City",
+               "Monterey County Office of Ed",
+               "Gonzales",
+               "Greenfield",
+               "Bradley",
+               "San Ardo"
+    
+)
+
+
 caaspp.mry <- tbl(con, "CAASPP") %>% 
     filter(County_Code == "27",
         # DistrictCode == "10272",
@@ -45,7 +73,7 @@ caaspp.mry <- tbl(con, "CAASPP") %>%
 caaspp.mry %>%
     filter(Grade == 13,
            Subgroup_ID == "1",
-           Test_Id == 2, # ELA 
+           Test_Id == 1, # ELA 
            Entity_Type == "District",
            !is.na(Percentage_Standard_Met_and_Above)
     ) %>%
@@ -58,7 +86,7 @@ lollipop(Percentage_Standard_Met_and_Above,
          title = ("CAASPP ELA Rates Meeting or Exceeding by District"),
          caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
 
-ggsave(here("figs", paste0("CAASPP ELA Rates Meeting or Exceeding by District",  Sys.Date(),".png" )),
+ggsave(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
        width = 8, height = 6)
 
 
@@ -81,7 +109,7 @@ caaspp.mry %>%
          caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
 
 
-ggsave(here("figs", paste0("CAASPP ELA Rates Meeting or Exceeding by 11th grade",  Sys.Date(),".png" )),
+ggsave(here("figs", paste0("All Districts 11th grade ELA Rates Meeting or Exceeding",  Sys.Date(),".png" )),
        width = 8, height = 6)
 
 # Student Groups at Salinas Union
@@ -142,7 +170,18 @@ ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  S
 lolli.subgroups("South Monterey County", 2)
 
 
-lolli.subgroups("Carmel")
+lolli.subgroups("Mission", 2)
+
+
+for (i in 1:2) {
+    for (j in districts) {
+        
+        lolli.subgroups(j, i)
+        
+    }
+    
+    
+}
 
 
 lolli.schools <- function(dist, test.id = 1) {
@@ -178,6 +217,19 @@ lolli.schools("Salinas City", 2)
 
 
 lolli.schools("Alisal", 1)
+
+
+
+for (i in 1:2) {
+    for (j in districts) {
+        
+        lolli.schools(j, i)
+        
+    }
+    
+    
+}
+
 
 
 

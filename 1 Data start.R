@@ -139,6 +139,32 @@ ggsave(here("figs", paste0("CAASPP ELA Rates Meeting or Exceeding at Salinas Uni
 
 
 
+caaspp.mry %>%
+    filter(Grade == 13,
+           is.na(District_Name),
+           # Subgroup_ID == "1",
+           Test_Id == 2, # ELA 
+     #      Entity_Type == "District",
+           !is.na(Percentage_Standard_Met_and_Above),
+           !str_detect(Subgroup, " - ")
+    ) %>%
+    lollipop(Percentage_Standard_Met_and_Above,
+             Subgroup,
+             "sea green") +
+    labs(x = "",
+         y = "",
+         color ="",
+         title = paste0("Monterey County ", "Math" ," Rates Meeting or Exceeding by Student Group"),
+         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+
+
+ggsave(here("figs", paste0("Monterey County ", "Math" ," Rates Meeting or Exceeding by Student Group",  Sys.Date(),".png" )),
+       width = 8, height = 6)
+
+
+
+
+
 lolli.subgroups <- function(dist, test.id = 1) {
 
     test.name <- if_else(test.id == 1, "ELA", "Math")

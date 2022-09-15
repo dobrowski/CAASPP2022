@@ -100,13 +100,14 @@ ggsave(here("figs", paste0("Monterey County ", "ELA" ," Rates Meeting or Exceedi
 
 
 
-lolli.subgroups <- function(dist, test.id = 1) {
+lolli.subgroups <- function(dist = "", test.id = 1) {
 
     test.name <- if_else(test.id == 1, "ELA", "Math")
     
 caaspp.mry %>%
     filter(Grade == 13,
            str_detect(District_Name,dist),
+
            # Subgroup_ID == "1",
            Test_Id == test.id, # ELA 
            Entity_Type == "District",
@@ -143,6 +144,50 @@ for (i in 1:2) {
     
     
 }
+
+
+
+lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+    caaspp.mry %>%
+        filter(Grade == 13,
+               str_detect(District_Name,dist),
+               str_detect(School_Name,schoo),
+               
+               # Subgroup_ID == "1",
+               Test_Id == test.id, # ELA 
+               Entity_Type == "School",
+               !is.na(Percentage_Standard_Met_and_Above),
+               !str_detect(Subgroup, " - "),
+               !str_detect(Subgroup, "Declined")
+        ) %>%
+        lollipop(Percentage_Standard_Met_and_Above,
+                 Subgroup,
+                 "sea green") +
+        labs(x = "",
+             y = "",
+             color ="",
+             title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding"),
+             subtitle = paste0(dist, "-",schoo," by Student Group"),
+             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+    
+    
+    ggsave(here("figs", paste0(dist, "-",schoo, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
+    
+}
+
+
+lolli.subgroups.school("Soledad", "Main St", 2)
+
+lolli.subgroups.school("Soledad", "Soledad High", 2)
+
+lolli.subgroups.school("Soledad", "Franscioni", 2)
+
+
+
 
 
 lolli.schools <- function(dist, test.id = 1) {

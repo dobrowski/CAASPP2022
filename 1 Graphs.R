@@ -135,6 +135,8 @@ lolli.subgroups("South Monterey County", 2)
 lolli.subgroups("Mission", 2)
 
 
+
+
 for (i in 1:2) {
     for (j in districts) {
         
@@ -144,6 +146,36 @@ for (i in 1:2) {
     
     
 }
+
+
+
+
+caaspp.mry %>%
+    filter(Grade == 13,
+           is.na(District_Name),
+           
+           # Subgroup_ID == "1",
+           Test_Id == 2, # ELA 
+ #          Entity_Type == "District",
+           !is.na(Percentage_Standard_Met_and_Above),
+           !str_detect(Subgroup, " - ")
+    ) %>%
+    lollipop(Percentage_Standard_Met_and_Above,
+             Subgroup,
+             "sea green") +
+    labs(x = "",
+         y = "",
+         color ="",
+         title = paste0("CAASPP ", "Math" ," Rates Meeting or Exceeding for Monterey County by Student Group"),
+         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+
+
+ggsave(here("figs", paste0("Monterey County ", "Math" ,  " Rates by Student Group ",  Sys.Date(),".png" )),
+       width = 8, height = 6)
+
+
+
+
 
 
 
@@ -163,8 +195,9 @@ lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
                !str_detect(Subgroup, " - "),
                !str_detect(Subgroup, "Declined")
         ) %>%
+        mutate(subgroup.n = paste0(Subgroup," (",Total_Tested_At_Entity_Level,")" )) %>%
         lollipop(Percentage_Standard_Met_and_Above,
-                 Subgroup,
+                 subgroup.n,
                  "sea green") +
         labs(x = "",
              y = "",
@@ -180,12 +213,102 @@ lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
 }
 
 
-lolli.subgroups.school("Soledad", "Main St", 2)
+lolli.subgroups.school("Soledad", "Main St", 1)
 
-lolli.subgroups.school("Soledad", "Soledad High", 2)
+lolli.subgroups.school("Soledad", "Soledad High", 1)
 
-lolli.subgroups.school("Soledad", "Franscioni", 2)
+lolli.subgroups.school("Soledad", "Franscioni", 1)
 
+
+
+
+caaspp.mry %>%
+    filter(Grade == 13,
+           str_detect(District_Name,"South Monterey County"),
+           str_detect(School_Name,"King City"),
+           
+            Subgroup_ID %in% c("1","128", "160") ,
+           Test_Id == 2, # ELA 
+           Entity_Type == "School",
+           !is.na(Percentage_Standard_Met_and_Above),
+           !str_detect(Subgroup, " - "),
+           !str_detect(Subgroup, "Declined")
+    ) %>%
+    mutate(subgroup.n = paste0(Subgroup," (",Total_Tested_At_Entity_Level,")" )) %>%
+    lollipop(Percentage_Standard_Met_and_Above,
+             subgroup.n,
+             "sea green") +
+    labs(x = "",
+         y = "",
+         color ="",
+         title = paste0("CAASPP ", "Math" ," Rates Meeting or Exceeding"),
+         subtitle = paste0("South Monterey County", "-", "King City" ," by Student Group"),
+         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+
+
+ggsave(here("figs", paste0("South Monterey County", "-", "King City ", " ", "Math",  " Rates by Student Group ",  Sys.Date(),".png" )),
+       width = 4, height = 3)
+
+
+
+
+
+
+
+schools <- c("Greenfield","King City")
+
+for (i in schools) {
+    for (j in 1:2) {
+        lolli.subgroups.school("South Monterey County", i, j)
+    }
+}
+
+
+
+lolli.subgroups.school.feeder8 <- function(dist = "", schoo = "", test.id = 1) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+    caaspp.mry2019 %>%
+        filter(Grade == 8,
+               str_detect(District_Name,dist),
+               str_detect(School_Name,schoo),
+               
+               # Subgroup_ID == "1",
+               Test_Id == test.id, # ELA 
+               # Entity_Type == "School",
+               !is.na(Percentage_Standard_Met_and_Above),
+               !str_detect(Subgroup, " - "),
+               !str_detect(Subgroup, "Declined")
+        ) %>%
+        mutate(subgroup.n = paste0(Subgroup," (",Total_Tested_At_Entity_Level,")" )) %>%
+        lollipop(Percentage_Standard_Met_and_Above,
+                 subgroup.n,
+                 "sea green") +
+        labs(x = "",
+             y = "",
+             color ="",
+             title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding in 8th Grade 2019"),
+             subtitle = paste0(dist, "-",schoo," by Student Group"),
+             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+    
+    
+    ggsave(here("figs", paste0(dist, "-",schoo, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
+    
+}
+
+
+
+
+lolli.subgroups.school.feeder8("King City", "Chalone Peaks", 1)
+
+lolli.subgroups.school.feeder8("Greenfield", "Vista Verde" , 1)
+
+
+lolli.subgroups.school.feeder8("King City", "Chalone Peaks", 2)
+
+lolli.subgroups.school.feeder8("Greenfield", "Vista Verde" , 2)
 
 
 
@@ -392,7 +515,7 @@ caaspp.long2 <- caaspp.long %>%
     
     
     
-compare.years <- function(df,collie, test.id = 1) {
+compare.years <- function(df,collie, test.id = 1, title.name) {
     
     test.name <- if_else(test.id == 1, "ELA", "Math")
     
@@ -413,14 +536,14 @@ compare.years <- function(df,collie, test.id = 1) {
          coord_flip() +
         mcoe_theme + 
         scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-        labs(title = paste0( "CAASPP ", test.name ," Rates Meeting or Exceeding"),
+        labs(title = paste0(title.name, " CAASPP ", test.name ," Rates Meeting or Exceeding"),
              subtitle = "Grey is 2019 and Blue is 2022",
              y = "",
              x = "",
              caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
     
-#    ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
-#           width = 8, height = 6)
+   ggsave(here("figs", paste0(title.name, " ", test.name,  " Change in Rates by Student Group ",  Sys.Date(),".png" )),
+          width = 8, height = 6)
     
 }
 
@@ -480,3 +603,29 @@ temp  %>%
     add_count() %>%
     filter(n>=4) %>%
     compare.years(Subgroup, 1)
+
+
+
+
+
+caaspp.soledad <- tbl(con, "CAASPP") %>% 
+    filter(County_Code == "27",
+           District_Code == "75440",
+           Test_Year %in% c("2019", "2022")
+    )%>%
+    collect() %>%
+    clean.caaspp()
+
+caaspp.soledad %>%
+    filter(Grade == 13,
+   #        str_detect(District_Name,"Salinas Union"),
+           str_detect(School_Name,"Franscioni"),
+           !str_detect(Subgroup, "Not migrant"),  # missing in 2019 and so messes up order if not excluded
+   !str_detect(Subgroup, "Declined"),  # missing in 2019 and so messes up order if not excluded
+ #  !str_detect(Subgroup, "IFEP"),  # missing in 2019 and so messes up order if not excluded
+ #  !str_detect(Subgroup, "Homeless"),  # missing in 2019 and so messes up order if not excluded
+   !is.na(Percentage_Standard_Met_and_Above),
+           !str_detect(Subgroup, " - ") # to remove all the race by socio-econ status categories
+    ) %>%
+    compare.years(Subgroup, 2, "Franscioni")
+

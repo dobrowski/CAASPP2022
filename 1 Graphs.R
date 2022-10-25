@@ -5,6 +5,13 @@
 
 # All Districts All Students 
 
+logo <- mcoe_logo()
+    
+source.link <- "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac.ets.org/caaspp/ResearchFileListSB?ps=true&lstTestYear=2022&lstTestType=B&lstCounty=00&lstDistrict=00000"    
+
+
+# png(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
+#     width = 600, height = 400)
 caaspp.mry %>%
     filter(Grade == 13,
            Subgroup_ID == "1",
@@ -18,11 +25,106 @@ lollipop(Percentage_Standard_Met_and_Above,
     labs(x = "",
          y = "",
          color ="",
-         title = ("CAASPP ELA Rates Meeting or Exceeding by District"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+         title = ("CAASPP 2022 ELA Rates Meeting or Exceeding by District"),
+         caption = source.link) 
+grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
+# dev.off()
+
+
 
 ggsave(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
        width = 8, height = 6)
+
+
+
+
+county.graph <- function(test.id) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+    caaspp.mry %>%
+        filter(Grade == 13,
+               Subgroup_ID == "1",
+               Test_Id == test.id, # ELA 
+               Entity_Type == "District",
+               !is.na(Percentage_Standard_Met_and_Above)
+        ) %>%
+        lollipop(Percentage_Standard_Met_and_Above,
+                 District_Name,
+                 "steel blue") +
+        labs(x = "",
+             y = "",
+             color ="",
+             title = paste0("CAASPP 2022 ", test.name, " Rates Meeting or Exceeding by District"),
+             caption = source.link
+             ) 
+    grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
+    # dev.off()
+    
+    
+    
+    ggsave(here("figs", paste0("All Districts ", test.name, " Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
+}
+
+
+
+county.graph(1)
+
+
+county.graph(2)
+
+
+
+county.alpha <- function(test.id, colorme) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+    caaspp.mry %>%
+        filter(Grade == 13,
+               Subgroup_ID == "1",
+               Test_Id == test.id, # ELA 
+               Entity_Type == "District",
+               !is.na(Percentage_Standard_Met_and_Above)
+        ) %>%
+        ggplot2::ggplot( aes( y = Percentage_Standard_Met_and_Above/100,
+                                 x = reorder(District_Name, desc(District_Name)), #forcats::fct_reorder(District_Name,Percentage_Standard_Met_and_Above) ,
+                                 label = scales::percent(Percentage_Standard_Met_and_Above/100, accuracy = .1))) +
+        geom_segment( aes(x= reorder(District_Name, desc(District_Name)), #forcats::fct_reorder(District_Name, Percentage_Standard_Met_and_Above/100),
+                          xend= reorder(District_Name, desc(District_Name)), #forcats::fct_reorder(District_Name, Percentage_Standard_Met_and_Above/100),
+                          y=0,
+                          yend=Percentage_Standard_Met_and_Above/100),
+                      color=colorme,
+                      size =2 ) +
+        geom_point( color=colorme, size=5, alpha=0.6) +
+        coord_flip() +
+        geom_text(size = 3, color = "black") +
+        scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+        #  facet_grid(facets = vars(`Student Group`), scales = "free" ) +
+        theme_hc() +
+        mcoe_theme +
+        labs(x = "",
+             y = "",
+             color ="",
+             title = paste0("CAASPP 2022 ", test.name, " Rates Meeting or Exceeding by District"),
+             caption = source.link
+        ) 
+    grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
+    # dev.off()
+    
+    
+    
+    ggsave(here("figs", paste0("All Districts ", test.name, " Rates Meeting or Exceeding - Alpha ",  Sys.Date(),".png" )),
+           width = 8, height = 6)
+}
+
+
+
+county.alpha(1, colorme =  "steel blue")
+county.alpha(2, colorme =  "steel blue")
+
+
+
 
 
 #  11th Grade ELA 
@@ -41,8 +143,8 @@ caaspp.mry %>%
          y = "",
          color ="",
          title = ("CAASPP ELA Rates Meeting or Exceeding by 11th grade"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0("All Districts 11th grade ELA Rates Meeting or Exceeding",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -65,8 +167,8 @@ caaspp.mry %>%
          y = "",
          color ="",
          title = ("CAASPP ELA Rates Meeting or Exceeding at Salinas Union by Student Group"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0("CAASPP ELA Rates Meeting or Exceeding at Salinas Union by Student Group",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -90,8 +192,8 @@ caaspp.mry %>%
          y = "",
          color ="",
          title = paste0("Monterey County ", "ELA" ," Rates Meeting or Exceeding by Student Group"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0("Monterey County ", "ELA" ," Rates Meeting or Exceeding by Student Group",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -114,15 +216,16 @@ caaspp.mry %>%
            !is.na(Percentage_Standard_Met_and_Above),
            !str_detect(Subgroup, " - ")
     ) %>%
+    mutate(subgroup.n = paste0(Subgroup," (",Total_Tested_At_Entity_Level,")" )) %>%
     lollipop(Percentage_Standard_Met_and_Above,
-             Subgroup,
-             "sea green") +
+             subgroup.n,
+             "sea green") + 
     labs(x = "",
          y = "",
          color ="",
-         title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding at ",dist," by Student Group"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         title = paste0("CAASPP 2022 ", test.name ," Rates Meeting or Exceeding at ",dist," by Student Group"),
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -132,7 +235,7 @@ ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  S
 lolli.subgroups("South Monterey County", 2)
 
 
-lolli.subgroups("Mission", 2)
+lolli.subgroups("Soledad", 2)
 
 
 
@@ -167,8 +270,8 @@ caaspp.mry %>%
          y = "",
          color ="",
          title = paste0("CAASPP ", "Math" ," Rates Meeting or Exceeding for Monterey County by Student Group"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0("Monterey County ", "Math" ,  " Rates by Student Group ",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -198,14 +301,17 @@ lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
         mutate(subgroup.n = paste0(Subgroup," (",Total_Tested_At_Entity_Level,")" )) %>%
         lollipop(Percentage_Standard_Met_and_Above,
                  subgroup.n,
-                 "sea green") +
+                 "sea green") + 
+        theme(panel.grid.major.x = element_line(color = "dark grey",
+                                              size = 0.5,
+                                              linetype = 1)) +
         labs(x = "",
              y = "",
              color ="",
-             title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding"),
+             title = paste0("CAASPP 2022 ", test.name ," Rates Meeting or Exceeding"),
              subtitle = paste0(dist, "-",schoo," by Student Group"),
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-    
+             caption = source.link
+        ) 
     
     ggsave(here("figs", paste0(dist, "-",schoo, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
            width = 8, height = 6)
@@ -213,11 +319,21 @@ lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
 }
 
 
-lolli.subgroups.school("Soledad", "Main St", 1)
+lolli.subgroups.school("Soledad", "Main St", 2)
 
-lolli.subgroups.school("Soledad", "Soledad High", 1)
+lolli.subgroups.school("Soledad", "Soledad High", 2)
 
-lolli.subgroups.school("Soledad", "Franscioni", 1)
+lolli.subgroups.school("Soledad", "Franscioni", 2)
+
+lolli.subgroups.school("South Monterey", "Greenfield", 1)
+
+
+
+
+lolli.subgroups.school("Santa Rita", "Santa Rita Elementary", 2)
+
+lolli.subgroups.school("Santa Rita", "Gavilan View", 2)
+
 
 
 
@@ -243,8 +359,8 @@ caaspp.mry %>%
          color ="",
          title = paste0("CAASPP ", "Math" ," Rates Meeting or Exceeding"),
          subtitle = paste0("South Monterey County", "-", "King City" ," by Student Group"),
-         caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-
+         caption = source.link
+    ) 
 
 ggsave(here("figs", paste0("South Monterey County", "-", "King City ", " ", "Math",  " Rates by Student Group ",  Sys.Date(),".png" )),
        width = 4, height = 3)
@@ -290,8 +406,8 @@ lolli.subgroups.school.feeder8 <- function(dist = "", schoo = "", test.id = 1) {
              color ="",
              title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding in 8th Grade 2019"),
              subtitle = paste0(dist, "-",schoo," by Student Group"),
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-    
+             caption = source.link
+        ) 
     
     ggsave(here("figs", paste0(dist, "-",schoo, " ", test.name,  " Rates by Student Group ",  Sys.Date(),".png" )),
            width = 8, height = 6)
@@ -333,8 +449,8 @@ lolli.schools <- function(dist, test.id = 1) {
              y = "",
              color ="",
              title = paste0("CAASPP ", test.name ," Rates Meeting or Exceeding at ",dist," by School"),
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-    
+             caption = source.link
+        ) 
 
 ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by School ",  Sys.Date(),".png" )),
        width = 8, height = 6)
@@ -463,8 +579,8 @@ caaspp.long2 <- caaspp.long %>%
              subtitle = "Grey is 2019 and Green is 2022",
              y = "",
              x = "",
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-        
+             caption = source.link
+        ) 
     
     ggsave(here("figs", paste0("All Districts Math compared 2019 ",  Sys.Date(),".png" )),
            width = 8, height = 6)
@@ -506,8 +622,8 @@ caaspp.long2 <- caaspp.long %>%
              subtitle = "Grey is 2019 and Blue is 2022",
              y = "",
              x = "",
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
-    
+             caption = source.link
+        ) 
     
     ggsave(here("figs", paste0("All Districts ELA compared 2019 ",  Sys.Date(),".png" )),
            width = 8, height = 6)
@@ -540,7 +656,8 @@ compare.years <- function(df,collie, test.id = 1, title.name) {
              subtitle = "Grey is 2019 and Blue is 2022",
              y = "",
              x = "",
-             caption = "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB") 
+             caption = source.link
+        ) 
     
    ggsave(here("figs", paste0(title.name, " ", test.name,  " Change in Rates by Student Group ",  Sys.Date(),".png" )),
           width = 8, height = 6)

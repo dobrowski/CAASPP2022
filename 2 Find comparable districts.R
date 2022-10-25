@@ -13,7 +13,7 @@ SoMoCo <- udp.with.perc %>%
 
 
 udp.comp <- udp.with.perc %>%
-    filter(district_type == "High School District",
+    filter(# district_type == "High School District",
            high_grade == "12",
            el.perc >= .22,
            frpm.perc >= .80,
@@ -47,8 +47,8 @@ caaspp.somoco.comp <- tbl(con, "CAASPP") %>%
            Math = `2`)
 
 joint <- left_join(udp.comp, caaspp.somoco.comp) %>%
-    filter(ELA > 60,
-           Math > 15) %>%
+    # filter(ELA > 60,
+    #        Math > 15) %>%
     select(county_name:school_name, total_enrollment, el.perc:Math) %>%
     mutate(el.perc = round2(el.perc*100,1),
            frpm.perc = round2(frpm.perc*100,1),

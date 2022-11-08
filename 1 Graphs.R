@@ -223,7 +223,7 @@ caaspp.mry %>%
     labs(x = "",
          y = "",
          color ="",
-         title = paste0("CAASPP 2022 ", test.name ," Rates Meeting or Exceeding at ",dist," by Student Group"),
+         title = paste0("CAASPP 2022 ", test.name ," Rates Meeting or Exceeding at \n",dist," by Student Group"),
          caption = source.link
     ) 
 
@@ -234,11 +234,12 @@ ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by Student Group ",  S
 
 lolli.subgroups("South Monterey County", 2)
 
+lolli.subgroups("South Monterey County", 1)
 
 lolli.subgroups("Soledad", 2)
 
 
-
+districts<- "Salinas Union"
 
 for (i in 1:2) {
     for (j in districts) {

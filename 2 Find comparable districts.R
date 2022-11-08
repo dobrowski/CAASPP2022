@@ -9,7 +9,7 @@ udp.with.perc <- udp %>%
 
 
 SoMoCo <- udp.with.perc %>% 
-    filter(str_detect(district_name, "South Monterey"))
+    filter(str_detect(district_name, "Salinas Union"))
 
 
 udp.comp <- udp.with.perc %>%

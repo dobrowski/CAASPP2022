@@ -113,3 +113,10 @@ caaspp.wide <- function(df, namer) {
 }
 
 
+
+
+cast <- tbl(con, "CAST") %>% 
+    filter(County_Code == "27",
+           # DistrictCode == "10272",
+           Test_Year >= "2022") %>%
+    collect() 

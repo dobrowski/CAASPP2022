@@ -15,11 +15,11 @@ SoMoCo <- udp.with.perc %>%
 udp.comp <- udp.with.perc %>%
     filter(# district_type == "High School District",
            high_grade == "12",
-           el.perc >= .22,
+           el.perc >= .10,
            frpm.perc >= .80,
            charter_school_y_n == "N",
            str_detect(school_type,"Public"),
-           total_enrollment >= 1000
+           total_enrollment >= 2000
            )
 
 
@@ -54,3 +54,39 @@ joint <- left_join(udp.comp, caaspp.somoco.comp) %>%
            frpm.perc = round2(frpm.perc*100,1),
            ELA = round2(ELA,1),
            Math = round2(Math,1))
+
+
+
+
+
+
+
+
+caaspp.somoco.comp <- tbl(con, "CAST") %>% 
+     filter(#County_Code == "27",
+    #     # DistrictCode == "10272",
+         Test_Year >= "2022",
+         Grade == 14,
+         Demographic_ID == "1",
+    #     Type_ID == "7"
+    ) %>%
+  #  head(20) %>%
+    collect() %>%
+    select(county_code = County_Code,
+           district_code = District_Code,
+           school_code = School_Code,
+#           Test_Id,
+           Percentage_Standard_Met_and_Above) %>%
+    mutate(Percentage_Standard_Met_and_Above = as.numeric(Percentage_Standard_Met_and_Above)) # %>%
+#     pivot_wider(id_cols = c(county_code,district_code,school_code),
+# #                names_from = Test_Id,
+#                 values_from = Percentage_Standard_Met_and_Above) 
+
+joint <- left_join(udp.comp, caaspp.somoco.comp) %>%
+     filter(Percentage_Standard_Met_and_Above > 30) %>%
+    select(county_name:school_name, total_enrollment, el.perc:Percentage_Standard_Met_and_Above) %>%
+    mutate(el.perc = round2(el.perc*100,1),
+           frpm.perc = round2(frpm.perc*100,1),
+           # ELA = round2(ELA,1),
+           # Math = round2(Math,1)
+           )

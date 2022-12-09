@@ -32,3 +32,6 @@ dist.tbl <- caaspp.mry %>%
 
 
 clipr::write_clip(dist.tbl)
+
+
+write_rds( dist.tbl, here("data","dist-comp.rds"))

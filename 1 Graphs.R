@@ -239,7 +239,7 @@ lolli.subgroups("South Monterey County", 1)
 lolli.subgroups("Soledad", 2)
 
 
-districts<- "Salinas Union"
+districts<- "Spreckels"
 
 for (i in 1:2) {
     for (j in districts) {
@@ -369,14 +369,29 @@ ggsave(here("figs", paste0("South Monterey County", "-", "King City ", " ", "Mat
 
 
 
+caaspp.mry %>%
+    filter(str_detect(District_Name,"Salinas Union")) %>%
+    select(School_Name) %>%
+    distinct()
 
 
-
-schools <- c("Greenfield","King City")
+schools <- c( "El Puente"                      ,          
+              "Rancho San Juan High"            ,         
+              "Alisal High"                      ,        
+              "Everett Alvarez High"              ,       
+     #         "Carr Lake Community Day"            ,      
+              "North Salinas High"                  ,     
+              "Mount Toro High"                      ,    
+              "Salinas High"                          ,   
+              "El Sausal Middle"                       ,  
+              "Washington Middle"                       , 
+              "Harden Middle"                            ,
+              "La Paz Middle"
+              )
 
 for (i in schools) {
     for (j in 1:2) {
-        lolli.subgroups.school("South Monterey County", i, j)
+        lolli.subgroups.school("Salinas Union", i, j)
     }
 }
 
@@ -724,7 +739,49 @@ temp  %>%
 
 
 
+# ELA by Grade --- 
+caaspp.ela.3.5 <- tbl(con, "CAASPP") %>% 
+    filter(# Type_ID == 5,
+        Subgroup_ID == 1,
+        Grade %in% c(3,4,5),
+         County_Code == "27",
+     #   District_Code == "00000",
+     School_Code == "0000000",
+        Test_Year %in% c("2019","2022")) %>%
+    collect() %>%
+    clean.caaspp() %>%
+    left_join(ent2) %>%
+    mutate(Percentage_Standard_Met_and_Above = as.numeric(Percentage_Standard_Met_and_Above))
 
+
+for (g in 3:5) {
+    
+caaspp.ela.3.5  %>%
+    filter(Grade == g,
+           District_Code != "00000") %>%
+    compare.years(District_Name, 1, paste0("ELA ",g," Grade"))
+
+}
+
+
+caaspp.ela.3.5.wide <- caaspp.ela.3.5 %>%
+    filter(Test_Id == 1) %>%
+    select(District_Code, District_Name, Grade, Test_Id, Test_Year, Percentage_Standard_Met_and_Above,
+           Students_with_Scores ) %>%
+    mutate(Count_Met_And_Above = round2(Students_with_Scores * Percentage_Standard_Met_and_Above / 100, 0)) %>%
+    group_by(District_Code, District_Name, Test_Id,Test_Year) %>%
+    mutate(denom = sum(Students_with_Scores),
+           numer = sum(Count_Met_And_Above),
+           Percentage_Standard_Met_and_Above = 100*numer/denom) %>%
+    select(District_Code, District_Name, Test_Id, Test_Year, Percentage_Standard_Met_and_Above) %>%
+    distinct() %>%
+    na.omit() %>%
+    filter(!str_detect(District_Name,"Lagunita|Mission|Office|Antonio")) %>%
+    compare.years(District_Name, 1, paste0("Combined 3-5 Grade"))
+
+
+
+### Single School ----
 
 caaspp.soledad <- tbl(con, "CAASPP") %>% 
     filter(County_Code == "27",
@@ -747,3 +804,244 @@ caaspp.soledad %>%
     ) %>%
     compare.years(Subgroup, 2, "Franscioni")
 
+### San Antonio -----
+
+dist.name <- "Spreckels"
+dist.code <- 66225
+
+caaspp.san.antonio <- tbl(con, "CAASPP") %>% 
+    filter(County_Code %in% c("00" ,"27"),
+           District_Code %in% c("00000", dist.code),
+           Test_Year %in% c("2019", "2022")
+    )%>%
+    collect() %>%
+    clean.caaspp()
+
+
+san.antonio.groups <- caaspp.san.antonio %>%
+    filter(Test_Year == "2022",
+           District_Code == dist.code,
+           !is.na(Percentage_Standard_Met_and_Above),
+           Grade == "13"
+           ) %>% 
+    select(Subgroup, Percentage_Standard_Met_and_Above) %>% 
+    mutate(Subgroup = factor(Subgroup),
+           Subgroup = fct_reorder(Subgroup, Percentage_Standard_Met_and_Above)) 
+    
+
+
+# Compare Years 
+
+caaspp.san.antonio %>%
+    filter(Grade == 13,
+           District_Code == dist.code,
+           School_Code == "0000000",
+           Subgroup %in% san.antonio.groups$Subgroup,
+           # #        str_detect(District_Name,"Salinas Union"),
+            !str_detect(Subgroup, "Not migrant"),  # missing in 2019 and so messes up order if not excluded
+           !str_detect(Subgroup, "Graduate school"),    # missing in 2019 and so messes up order if not excluded
+           #  !str_detect(Subgroup, "English Learner"),  # missing in 2019 and so messes up order if not excluded
+             !str_detect(Subgroup, "Declined"),  # missing in 2019 and so messes up order if not excluded
+           !is.na(Percentage_Standard_Met_and_Above),
+   #        !str_detect(Subgroup, " - ") # to remove all the race by socio-econ status categories
+    ) %>%
+    compare.years(Subgroup, 2, dist.name)
+
+#ggsave(here("figs", paste0("Compared years ",dist.name," ELA.png")))
+
+
+
+
+
+# s.a.years <- caaspp.san.antonio %>%
+#     filter(Grade == 13,
+#            District_Code == dist.code,
+#            School_Code == "0000000",
+#            Test_Id == 2, 
+#          #  Subgroup %in% san.antonio.groups$Subgroup,
+#            # #        str_detect(District_Name,"Salinas Union"),
+#             !str_detect(Subgroup, "Not migrant"),  # missing in 2019 and so messes up order if not excluded
+#            !str_detect(Subgroup, "Graduate school"),  
+#            # !str_detect(Subgroup, "Declined"),  # missing in 2019 and so messes up order if not excluded
+#            # !str_detect(Subgroup, "Not a high school graduate"),
+#            # !str_detect(Subgroup, "English learners enrolled in school "),
+#            # !str_detect(Subgroup, "English learner"),
+#            # # #  !str_detect(Subgroup, "IFEP"),  # missing in 2019 and so messes up order if not excluded
+#            # #  !str_detect(Subgroup, "Homeless"),  # missing in 2019 and so messes up order if not excluded
+#            !is.na(Percentage_Standard_Met_and_Above),
+#            #        !str_detect(Subgroup, " - ") # to remove all the race by socio-econ status categories
+#     ) 
+# 
+# 
+# 
+# ggplot(mapping = aes(x = reorder(Subgroup, Percentage_Standard_Met_and_Above),
+#                      y = Percentage_Standard_Met_and_Above/100)) +
+#     geom_col(data =  s.a.years[s.a.years$Test_Year == "2019",],  
+#              position = "dodge" ,
+#              
+#              fill = "light grey",
+#              width = 0.75) +
+#     geom_col(data =  s.a.years[s.a.years$Test_Year == "2022",],
+#                       position = "dodge" ,
+#              width = 0.5,
+#              fill = "steel blue") +
+#     coord_flip() +
+#     mcoe_theme + 
+#     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+#     labs(title = paste0(dist.name, " CAASPP Math Rates Meeting or Exceeding"),
+#          subtitle = "Grey is 2019 and Blue is 2022",
+#          y = "",
+#          x = "",
+#          caption = source.link
+#     ) 
+
+
+
+
+### Compare three levels 
+
+# caaspp.san.antonio %>%
+#     filter(Grade == 13,
+#            Test_Year == "2022",
+#            Subgroup %in% san.antonio.groups$Subgroup,
+#            Test_Id == 1,
+#            Entity_Type != "School",
+#            Subgroup != "NA"
+#     ) %>%
+#     ggplot(aes(x = reorder(Subgroup, Percentage_Standard_Met_and_Above),
+#                y = Percentage_Standard_Met_and_Above/100,
+#                fill = Entity_Type
+#                )) +
+#     geom_col(position = "dodge") + 
+#     coord_flip() + 
+#     mcoe_theme + 
+#     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+#     labs(title = paste0( dist.name," 2022 CAASPP ELA Percent Meet and Exceed by Student Group"),
+# #         subtitle = "Grey is 2019 and Blue is 2022",
+#          y = "",
+#          x = "",
+#          caption = source.link
+#     ) 
+
+three.levels <- function(df, test.id, dist.name) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+
+san.antonio.graph <- df %>%
+    filter(Grade == 13,
+           Test_Year == "2022",
+           Subgroup %in% san.antonio.groups$Subgroup,
+           Test_Id == test.id,
+           Entity_Type != "School",
+           Subgroup != "NA"
+    ) 
+
+
+    ggplot(mapping = aes(x = reorder(Subgroup, Percentage_Standard_Met_and_Above),
+               y = Percentage_Standard_Met_and_Above/100,
+               fill = Entity_Type
+    )) +
+    geom_col(data =  san.antonio.graph[san.antonio.graph$Entity_Type == "State",], 
+             fill = "light grey",
+             width = 0.8) + 
+        geom_col(data =  san.antonio.graph[san.antonio.graph$Entity_Type == "County",], 
+                 fill = "light blue",
+                 width = 0.65) + 
+        geom_col(data =  san.antonio.graph[san.antonio.graph$Entity_Type == "District",], 
+                 fill = "orange",
+                 width = 0.50) + 
+    coord_flip() + 
+    mcoe_theme + 
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(title = paste0("2022 CAASPP ", test.name ," Percent Meet and Exceed by Student Group"),
+                  subtitle = paste0("Grey is California, Blue is Monterey County and Orange is ", dist.name),
+         y = "",
+         x = "",
+         caption = source.link
+    ) 
+
+ggsave(here("figs", paste0(dist.name, ", Monterey County and California - ", test.name ,  Sys.Date(),".png" )),
+       width = 8, height = 6)
+
+}
+
+three.levels(caaspp.san.antonio, 1, dist.name)
+
+#  Over time 
+
+
+over.time <- function(df, test.id, dist.name, heading) {
+    
+    test.name <- if_else(test.id == 1, "ELA", "Math")
+    
+
+sa.long <- df %>%
+    filter(Grade == 13,
+           Subgroup_ID == "1",
+           Test_Id == test.id, # ELA 
+           School_Code == "0000000"
+    ) 
+
+entit <- sa.long %>%
+    filter(Test_Year == "2022") %>%
+    select(County_Code,District_Code,School_Code, Entity = Entity_Type)
+
+
+sa.long <- sa.long %>%
+    left_join(entit) %>%
+    distinct()
+
+
+ggplot(data = sa.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Above, group = Entity)) +
+  #  facet_wrap(~Entity) +
+    geom_line(aes(color = Entity, alpha = 1), size = 1) +
+    geom_text_repel(data = sa.long %>% filter(Test_Year == "2019"),
+                    aes(label = Entity) ,
+                    hjust = "left",
+                    segment.size = .2,
+                    segment.color = "grey",
+                    size = 3,
+                    nudge_x = -.4,
+                    direction = "y") +
+    geom_text_repel(data = sa.long %>% filter(Test_Year == "2022"),
+                    aes(label = Entity) ,
+                    hjust = "right",
+                    segment.size = .2,
+                    segment.color = "grey",
+                    fontface = "bold",
+                    size = 3,
+                    nudge_x = .4,
+                    direction = "y") +
+    geom_label(aes(label = Percentage_Standard_Met_and_Above),
+               size = 2.5,
+               label.padding = unit(0.05, "lines"),
+               label.size = 0.0) +
+    theme_hc() +  # Remove the legend
+    # theme(axis.text.y      = element_blank()) +
+    # theme(panel.grid.major.y = element_blank()) +
+    # theme(panel.grid.minor.y = element_blank()) +
+    # theme(axis.ticks       = element_blank()) +
+    scale_x_discrete(position = "top") +
+    theme(legend.position = "none") +
+    labs(#title = "San Antonio Decreased More Sharply than Monterey County or California",
+         #subtitle = "CAASPP ELA",
+        title = paste0(dist.name, heading, " compared to Monterey County, and California"),
+        subtitle = paste0("CAASPP ",test.name),
+         y = "Percent Meeting or Exceeding Standard",
+         x = "")
+
+
+
+ggsave(here("figs", paste0("Over time ",dist.name," Monterey County and California - ", test.name ,  Sys.Date(),".png" )),
+       width = 8, height = 6)
+}
+
+over.time(caaspp.san.antonio,
+          2,
+          dist.name,
+          " decreased more sharply")
+
+
+
+### End -----

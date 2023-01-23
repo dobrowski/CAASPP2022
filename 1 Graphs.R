@@ -336,6 +336,7 @@ lolli.subgroups.school("Santa Rita", "Santa Rita Elementary", 2)
 lolli.subgroups.school("Santa Rita", "Gavilan View", 2)
 
 
+lolli.subgroups.school("Monterey Peninsula", "Highland", 1)
 
 
 
@@ -806,8 +807,8 @@ caaspp.soledad %>%
 
 ### San Antonio -----
 
-dist.name <- "Spreckels"
-dist.code <- 66225
+dist.name <- "South Monterey County"
+dist.code <- 66068
 
 caaspp.san.antonio <- tbl(con, "CAASPP") %>% 
     filter(County_Code %in% c("00" ,"27"),
@@ -837,15 +838,18 @@ caaspp.san.antonio %>%
            District_Code == dist.code,
            School_Code == "0000000",
            Subgroup %in% san.antonio.groups$Subgroup,
-           # #        str_detect(District_Name,"Salinas Union"),
             !str_detect(Subgroup, "Not migrant"),  # missing in 2019 and so messes up order if not excluded
-           !str_detect(Subgroup, "Graduate school"),    # missing in 2019 and so messes up order if not excluded
-           #  !str_detect(Subgroup, "English Learner"),  # missing in 2019 and so messes up order if not excluded
-             !str_detect(Subgroup, "Declined"),  # missing in 2019 and so messes up order if not excluded
+   #        !str_detect(Subgroup, "Graduate school"),    # missing in 2019 and so messes up order if not excluded
+#   !str_detect(Subgroup, "with disability"),  # missing in 2019 and so messes up order if not excluded
+#   !str_detect(Subgroup, "English learner"),  # missing in 2019 and so messes up order if not excluded
+#   !str_detect(Subgroup, "Homeless"),  # missing in 2019 and so messes up order if not excluded
+   !str_detect(Subgroup, "Not Foster"),  # missing in 2019 and so messes up order if not excluded
+   !str_detect(Subgroup, "White - Not"),  # missing in 2019 and so messes up order if not excluded
+   !str_detect(Subgroup, "Declined"),  # missing in 2019 and so messes up order if not excluded
            !is.na(Percentage_Standard_Met_and_Above),
    #        !str_detect(Subgroup, " - ") # to remove all the race by socio-econ status categories
     ) %>%
-    compare.years(Subgroup, 2, dist.name)
+    compare.years(Subgroup, 1, dist.name)
 
 #ggsave(here("figs", paste0("Compared years ",dist.name," ELA.png")))
 
@@ -966,7 +970,7 @@ ggsave(here("figs", paste0(dist.name, ", Monterey County and California - ", tes
 
 }
 
-three.levels(caaspp.san.antonio, 1, dist.name)
+three.levels(caaspp.san.antonio, 2, dist.name)
 
 #  Over time 
 
@@ -1038,9 +1042,9 @@ ggsave(here("figs", paste0("Over time ",dist.name," Monterey County and Californ
 }
 
 over.time(caaspp.san.antonio,
-          2,
+          1,
           dist.name,
-          " decreased more sharply")
+          " decreased less sharply")
 
 
 

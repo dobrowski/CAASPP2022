@@ -7,34 +7,34 @@
 
 logo <- mcoe_logo()
     
-source.link <- "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac.ets.org/caaspp/ResearchFileListSB?ps=true&lstTestYear=2022&lstTestType=B&lstCounty=00&lstDistrict=00000"    
+source.link <- "Source: Smarter Balance Summative Assessment Research Files  \n https://caaspp-elpac-preview.ets.org/caaspp/ResearchFileListSB?ps=true&lstTestYear=2023&lstTestType=B&lstCounty=27&lstDistrict=00000#dl"    
 
 
-# png(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
-#     width = 600, height = 400)
-caaspp.mry %>%
-    filter(Grade == 13,
-           Subgroup_ID == "1",
-           Test_Id == 1, # ELA 
-           Entity_Type == "District",
-           !is.na(Percentage_Standard_Met_and_Above)
-    ) %>%
-lollipop(Percentage_Standard_Met_and_Above,
-         District_Name,
-         "steel blue") +
-    labs(x = "",
-         y = "",
-         color ="",
-         title = ("CAASPP 2022 ELA Rates Meeting or Exceeding by District"),
-         caption = source.link) 
-grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
-# dev.off()
-
-
-
-ggsave(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
-       width = 8, height = 6)
-
+# # png(here("figs", paste0("All Districts ELA Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
+# #     width = 600, height = 400)
+# caaspp.mry %>%
+#     filter(Grade == 13,
+#            Subgroup_ID == "1",
+#            Test_Id == 2, # ELA 
+#            Entity_Type == "District",
+#            !is.na(Percentage_Standard_Met_and_Above)
+#     ) %>%
+# lollipop(Percentage_Standard_Met_and_Above,
+#          District_Name,
+#          "steel blue") +
+#     labs(x = "",
+#          y = "",
+#          color ="",
+#          title = ("CAASPP 2023 Math Rates Meeting or Exceeding by District"),
+#          caption = source.link) 
+# # grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
+# # dev.off()
+# 
+# 
+# 
+# ggsave(here("figs", paste0("All Districts Math Rates Meeting or Exceeding ",  Sys.Date(),".png" )),
+#        width = 8, height = 6)
+# 
 
 
 
@@ -55,7 +55,7 @@ county.graph <- function(test.id) {
         labs(x = "",
              y = "",
              color ="",
-             title = paste0("CAASPP 2022 ", test.name, " Rates Meeting or Exceeding by District"),
+             title = paste0("CAASPP ", yr.curr ," ", test.name, " Rates Meeting or Exceeding by District"),
              caption = source.link
              ) 
     grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
@@ -68,9 +68,7 @@ county.graph <- function(test.id) {
 }
 
 
-
 county.graph(1)
-
 
 county.graph(2)
 
@@ -106,7 +104,7 @@ county.alpha <- function(test.id, colorme) {
         labs(x = "",
              y = "",
              color ="",
-             title = paste0("CAASPP 2022 ", test.name, " Rates Meeting or Exceeding by District"),
+             title = paste0("CAASPP ", yr.curr, " ", test.name, " Rates Meeting or Exceeding by District"),
              caption = source.link
         ) 
     grid::grid.raster(logo, x = 0.03, y = 0.03, just = c('left', 'bottom'), width = unit(.75, 'inches'))
@@ -199,7 +197,7 @@ ggsave(here("figs", paste0("Monterey County ", "ELA" ," Rates Meeting or Exceedi
        width = 8, height = 6)
 
 
-
+### Subgroups by District ------
 
 
 lolli.subgroups <- function(dist = "", test.id = 1) {
@@ -223,7 +221,7 @@ caaspp.mry %>%
     labs(x = "",
          y = "",
          color ="",
-         title = paste0("CAASPP 2022 ", test.name ," Rates Meeting or Exceeding at \n",dist," by Student Group"),
+         title = paste0("CAASPP ", yr.curr, " ", test.name ," Rates Meeting or Exceeding at \n",dist," by Student Group"),
          caption = source.link
     ) 
 
@@ -251,7 +249,7 @@ for (i in 1:2) {
     
 }
 
-
+### Subgroups countywide ------
 
 
 caaspp.mry %>%
@@ -259,7 +257,7 @@ caaspp.mry %>%
            is.na(District_Name),
            
            # Subgroup_ID == "1",
-           Test_Id == 2, # ELA 
+           Test_Id == 1, # ELA 
  #          Entity_Type == "District",
            !is.na(Percentage_Standard_Met_and_Above),
            !str_detect(Subgroup, " - ")
@@ -270,17 +268,17 @@ caaspp.mry %>%
     labs(x = "",
          y = "",
          color ="",
-         title = paste0("CAASPP ", "Math" ," Rates Meeting or Exceeding for Monterey County by Student Group"),
+         title = paste0("CAASPP ", "ELA" ," Rates Meeting or Exceeding for Monterey County by Student Group"),
          caption = source.link
     ) 
 
-ggsave(here("figs", paste0("Monterey County ", "Math" ,  " Rates by Student Group ",  Sys.Date(),".png" )),
+ggsave(here("figs", paste0("Monterey County ", "ELA" ,  " Rates by Student Group ",  Sys.Date(),".png" )),
        width = 8, height = 6)
 
 
 
 
-
+####. Subgroups in a School --------
 
 
 lolli.subgroups.school <- function(dist = "", schoo = "", test.id = 1) {
@@ -338,6 +336,10 @@ lolli.subgroups.school("Santa Rita", "Gavilan View", 2)
 
 lolli.subgroups.school("Monterey Peninsula", "Highland", 1)
 
+
+lolli.subgroups.school("South Monterey", "Greenfield", 1)
+
+lolli.subgroups.school("South Monterey", "Greenfield", 2)
 
 
 caaspp.mry %>%
@@ -397,6 +399,8 @@ for (i in schools) {
 }
 
 
+#### Subgroups by Feeder schools ----
+
 
 lolli.subgroups.school.feeder8 <- function(dist = "", schoo = "", test.id = 1) {
     
@@ -444,7 +448,7 @@ lolli.subgroups.school.feeder8("King City", "Chalone Peaks", 2)
 lolli.subgroups.school.feeder8("Greenfield", "Vista Verde" , 2)
 
 
-
+### Schools in a District Comparison -------
 
 lolli.schools <- function(dist, test.id = 1) {
     
@@ -498,10 +502,10 @@ for (i in 1:2) {
 ###  Slopegraph ------
 
 
-caaspp.mry2019 <- tbl(con, "CAASPP") %>% 
+caaspp.mry.prior <- tbl(con, "CAASPP") %>% 
     filter(County_Code == "27",
            # DistrictCode == "10272",
-           Test_Year == "2019") %>%
+           Test_Year == "2022") %>%
     collect() %>%
     mutate(Subgroup_ID = as.character(Subgroup_ID)) %>%
     left_join_codebook("CAASPP", "Subgroup_ID") %>%
@@ -515,7 +519,7 @@ caaspp.mry2019 <- tbl(con, "CAASPP") %>%
 
 
 caaspp.long <- caaspp.mry %>%
-    bind_rows(caaspp.mry2019) %>%
+    bind_rows(caaspp.mry.prior) %>%
     filter(Grade == 13,
                       Subgroup_ID == "1",
                       Test_Id == 2, # ELA 
@@ -527,7 +531,7 @@ caaspp.long <- caaspp.mry %>%
 
 ggplot(data = caaspp.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Above, group = District_Name)) +
     geom_line(aes(color = District_Name, alpha = 1), size = 1) +
-    geom_text_repel(data = caaspp.long %>% filter(Test_Year == "2019"), 
+    geom_text_repel(data = caaspp.long %>% filter(Test_Year == "2022"), 
                     aes(label = District_Name) , 
                     hjust = "left", 
                     segment.size = .2,
@@ -535,7 +539,7 @@ ggplot(data = caaspp.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Ab
                     size = 3, 
                     nudge_x = -.4, 
                     direction = "y") +
-    geom_text_repel(data = caaspp.long %>% filter(Test_Year == "2022"), 
+    geom_text_repel(data = caaspp.long %>% filter(Test_Year == yr.curr), 
                     aes(label = District_Name) , 
                     hjust = "right", 
                     segment.size = .2,
@@ -555,7 +559,7 @@ ggplot(data = caaspp.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Ab
     theme(axis.ticks       = element_blank()) +
     scale_x_discrete(position = "top") +
     theme(legend.position = "none") +
-    labs(title = "Most districts decreased\n from 18-19 to 21-22 on Math",
+    labs(title = "Most districts were flat\n from 21-22 to 22-23 on Math",
          y = "Percent Meeting or Exceeding Standard by Grade",
          x = "")
 
@@ -563,7 +567,7 @@ ggplot(data = caaspp.long, aes(x = Test_Year, y = Percentage_Standard_Met_and_Ab
 
 
 caaspp.long <- caaspp.mry %>%
-    bind_rows(caaspp.mry2019) %>%
+    bind_rows(caaspp.mry.prior) %>%
     filter(Grade == 13,
            Subgroup_ID == "1",
            Test_Id == 2, # Math 
@@ -574,17 +578,17 @@ caaspp.long <- caaspp.mry %>%
 
 
 caaspp.long2 <- caaspp.long %>%
-    mutate(ranker = ifelse(Test_Year == "2022", Percentage_Standard_Met_and_Above, NA)) %>%
+    mutate(ranker = ifelse(Test_Year == yr.curr, Percentage_Standard_Met_and_Above, NA)) %>%
     filter(District_Name != "NA",
            District_Name != "Big Sur Unified")
 
 
     ggplot(mapping = aes(x = reorder(District_Name, Percentage_Standard_Met_and_Above),
                          y = Percentage_Standard_Met_and_Above/100)) +
-        geom_col(data =  caaspp.long2[caaspp.long2$Test_Year == "2019",], 
+        geom_col(data =  caaspp.long2[caaspp.long2$Test_Year == yr.prior,], 
                  fill = "light grey",
                  width = 0.75) +
-        geom_col(data = caaspp.long2[caaspp.long2$Test_Year == "2022",], 
+        geom_col(data = caaspp.long2[caaspp.long2$Test_Year == yr.curr,], 
         #         position = "dodge" ,
                  width = 0.5,
                  fill = "sea green") + 
@@ -593,13 +597,13 @@ caaspp.long2 <- caaspp.long %>%
         scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
  
         labs(title = "CAASPP Math Percent Meet and Exceed by District",
-             subtitle = "Grey is 2019 and Green is 2022",
+             subtitle = paste0("Grey is ",yr.prior," and Green is ", yr.curr),
              y = "",
              x = "",
              caption = source.link
         ) 
     
-    ggsave(here("figs", paste0("All Districts Math compared 2019 ",  Sys.Date(),".png" )),
+    ggsave(here("figs", paste0("All Districts Math compared 2022 ",  Sys.Date(),".png" )),
            width = 8, height = 6)
     
 
@@ -607,7 +611,7 @@ caaspp.long2 <- caaspp.long %>%
     
     
     caaspp.long <- caaspp.mry %>%
-        bind_rows(caaspp.mry2019) %>%
+        bind_rows(caaspp.mry.prior) %>%
         filter(Grade == 13,
                Subgroup_ID == "1",
                Test_Id == 1, # ELA 
@@ -618,17 +622,17 @@ caaspp.long2 <- caaspp.long %>%
     
     
     caaspp.long2 <- caaspp.long %>%
-        mutate(ranker = ifelse(Test_Year == "2022", Percentage_Standard_Met_and_Above, NA)) %>%
+        mutate(ranker = ifelse(Test_Year == yr.curr, Percentage_Standard_Met_and_Above, NA)) %>%
         filter(District_Name != "NA",
                District_Name != "Big Sur Unified")
     
     
     ggplot(mapping = aes(x = reorder(District_Name, Percentage_Standard_Met_and_Above),
                          y = Percentage_Standard_Met_and_Above/100)) +
-        geom_col(data =  caaspp.long2[caaspp.long2$Test_Year == "2019",], 
+        geom_col(data =  caaspp.long2[caaspp.long2$Test_Year == yr.prior,], 
                  fill = "light grey",
                  width = 0.75) +
-        geom_col(data = caaspp.long2[caaspp.long2$Test_Year == "2022",], 
+        geom_col(data = caaspp.long2[caaspp.long2$Test_Year == yr.curr,], 
                  #         position = "dodge" ,
                  width = 0.5,
                  fill = "steel blue") + 
@@ -636,13 +640,13 @@ caaspp.long2 <- caaspp.long %>%
         mcoe_theme + 
         scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(title = "CAASPP ELA Percent Meet and Exceed by District",
-             subtitle = "Grey is 2019 and Blue is 2022",
+             subtitle = paste0("Grey is ",yr.prior," and Blue is ",yr.curr),
              y = "",
              x = "",
              caption = source.link
         ) 
     
-    ggsave(here("figs", paste0("All Districts ELA compared 2019 ",  Sys.Date(),".png" )),
+    ggsave(here("figs", paste0("All Districts ELA compared 2022 ",  Sys.Date(),".png" )),
            width = 8, height = 6)
     
     
@@ -659,10 +663,10 @@ compare.years <- function(df,collie, test.id = 1, title.name) {
     
     ggplot(mapping = aes(x = reorder({{collie}}, Percentage_Standard_Met_and_Above),
                          y = Percentage_Standard_Met_and_Above/100)) +
-        geom_col(data =  df[df$Test_Year == "2019",],  
+        geom_col(data =  df[df$Test_Year == yr.prior,],  
                  fill = "light grey",
                  width = 0.75) +
-        geom_col(data =  df[df$Test_Year == "2022",],
+        geom_col(data =  df[df$Test_Year == yr.curr,],
                  #         position = "dodge" ,
                  width = 0.5,
                  fill = "steel blue") +
@@ -670,7 +674,7 @@ compare.years <- function(df,collie, test.id = 1, title.name) {
         mcoe_theme + 
         scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(title = paste0(title.name, " CAASPP ", test.name ," Rates Meeting or Exceeding"),
-             subtitle = "Grey is 2019 and Blue is 2022",
+             subtitle = paste0("Grey is ",yr.prior," and Blue is ",yr.curr),
              y = "",
              x = "",
              caption = source.link
@@ -687,7 +691,7 @@ caaspp.county.comp <- tbl(con, "CAASPP") %>%
            Grade == 13,
            # County_Code == "27",
             District_Code == "00000",
-           Test_Year %in% c("2019","2022")) %>%
+           Test_Year %in% c(yr.prior,yr.curr)) %>%
     collect() %>%
     left_join(ent2)
     
@@ -696,14 +700,14 @@ caaspp.county.comp %>%
     clean.caaspp() %>%
     mutate(Percentage_Standard_Met_and_Above = as.numeric(Percentage_Standard_Met_and_Above)) %>%
     filter(County_Code != "00") %>%
-    compare.years(County_Name, 1)
+    compare.years(County_Name, 1, "Counties")
 
 
 
-caaspp.long %>%
-    compare.years(District_Name)
+caaspp.long2 %>%
+    compare.years(District_Name, 1, "Districts")
     
-
+### End ish ------
 
 caaspp.suhsd %>%
     filter(Grade == 13,

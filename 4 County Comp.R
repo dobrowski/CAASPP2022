@@ -4,7 +4,7 @@
 udp <- tbl(con, "upc") %>% 
     filter(# County_Code == "27",
         # DistrictCode == "10272",
-        academic_year == "2021-2022"
+        academic_year == yr.acad
     ) %>%
     #    head() %>%
     collect() 
@@ -27,7 +27,7 @@ caaspp.county <- tbl(con, "CAASPP") %>%
            Grade == 13,
         # County_Code == "27",
            # DistrictCode == "10272",
-           Test_Year >= "2022") %>%
+           Test_Year >= yr.curr) %>%
     collect() %>%
     mutate(Subgroup_ID = as.character(Subgroup_ID)) %>%
     left_join_codebook("CAASPP", "Subgroup_ID") %>%

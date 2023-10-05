@@ -10,13 +10,17 @@ library(ggthemes)
 library(vroom)
 library(ggrepel)
 
+yr.curr <- 2023
+
+yr.prior <- 2022
 
 con <- mcoe_sql_con()
 
-ent <- read_delim(here("data","sb_ca2022entities_csv.txt"), delim = "^")
+# ent <- read_delim(here("data","sb_ca2022entities_csv.txt"), delim = "^")
+ent <- read_delim(here("data","sb_ca2023entities_csv.txt"), delim = "^")
 
 
-ent <- vroom(here("data","sb_ca2022entities_csv.txt"),
+ent <- vroom(here("data","sb_ca2023entities_csv.txt"),
              .name_repair = ~ janitor::make_clean_names(., case = "none"),
              delim = "^"
 )
@@ -57,7 +61,7 @@ districts <- c("Carmel",
 caaspp.mry <- tbl(con, "CAASPP") %>% 
     filter(County_Code == "27",
            # DistrictCode == "10272",
-           Test_Year >= "2022") %>%
+           Test_Year >= yr.curr) %>%
     collect() %>%
     mutate(Subgroup_ID = as.character(Subgroup_ID)) %>%
     left_join_codebook("CAASPP", "Subgroup_ID") %>%
@@ -89,12 +93,12 @@ caaspp.suhsd <- tbl(con, "CAASPP") %>%
     collect() %>%
     clean.caaspp()
 
-
+yr.acad <- paste0(yr.prior,"-",yr.curr)
 
 udp <- tbl(con, "upc") %>% 
     filter(# County_Code == "27",
         # DistrictCode == "10272",
-        academic_year == "2021-2022"
+        academic_year ==   yr.acad
     ) %>%
     #    head() %>%
     collect() 

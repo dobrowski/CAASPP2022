@@ -4,6 +4,7 @@
 library(googlesheets4)
 library(modelr)
 
+# List of subgroups from Meet and Exceed that are relevant on Dashboard 
 
 subgroup.list <- c(74,
       75,
@@ -21,6 +22,150 @@ subgroup.list <- c(74,
       31,
       128,
       80)
+
+### Add reference Standard points -------
+
+
+reference <- read_excel(here("data","ScaleScoreREference.xlsx"))
+
+reference2 <- pivot_longer(reference, cols = c(`1`,`2`,`3`,`4`) ) %>%
+    mutate(Grade = if_else(str_length(Grade) >= 2, Grade, paste0(0,Grade))) %>%
+    rename(Subject = Subject,
+           GradeLevelWhenAssessed = Grade,
+           ScaleScoreAchievementLevel = name,
+           ScaleScoreNext = value)
+
+
+reference3 <- reference2 %>%
+    filter(ScaleScoreAchievementLevel == 2) %>%
+    select(-ScaleScoreAchievementLevel) %>%
+    rename(MeetStandard = ScaleScoreNext)
+
+
+ref <- reference3 %>%
+    transmute(Grade = as.numeric(GradeLevelWhenAssessed),
+           Test_Id = case_match(Subject, "Math" ~ 2,
+                                "ELA" ~ 1),
+           MeetStandard
+           ) %>%
+    na.omit()
+
+### Estimate DFS for District  -----
+
+# Based on the grade level average scale score,  only really works for schools and groups with sufficient number 
+# of students at each grade level.  
+
+temp <- caaspp.mry %>%
+    filter(           
+        Grade != 13,
+        Subgroup_ID %in% subgroup.list,
+     #   Entity_Type == "District",
+      #  str_detect(District_Name,"Soledad")
+                      ) %>%
+    left_join(ref) %>%
+    mutate(cds = paste0(County_Code,District_Code,School_Code),
+           DFS =  Mean_Scale_Score - MeetStandard) %>%
+    group_by(District_Name,School_Name, cds, Test_Id, Subgroup_ID) %>%
+    mutate(
+           meanDFS = weighted.mean(DFS, Students_Tested),
+           tot.students = sum(Students_Tested)
+    ) %>%
+    select(cds, District_Name, School_Name, tot.students, meanDFS )  %>%
+    distinct() %>%
+    left_join_codebook("CAASPP", "Subgroup_ID") %>%
+    rename(Subgroup = definition)
+
+
+# Pulls prior year Dashboard data 
+
+dash.math.prior <- tbl(con, "DASH_MATH") %>% 
+    filter(countyname == "Monterey",
+        # DistrictCode == "10272",
+        reportingyear >= yr.prior) %>%
+    #    head(100) %>%
+    collect() %>%
+    left_join_codebook("DASH_MATH", "studentgroup") %>%
+    mutate(Test_Id = 2,
+           Subgroup_ID =  case_when(studentgroup ==  "AA" ~ 74,
+                                    studentgroup == "AI" ~ 75,
+                                    studentgroup == "ALL" ~ 1,
+                                    studentgroup == "AS" ~ 76,
+                                    #  CAA ~ 
+                                    studentgroup == "EL" ~ 160,
+                                    #   ELO ~ 160, # combine
+                                    studentgroup == "EO" ~ 180,
+                                    studentgroup == "FI" ~ 77,
+                                    studentgroup ==  "FOS" ~ 240,
+                                    studentgroup ==  "HI" ~ 78,
+                                    studentgroup ==  "HOM" ~ 52,
+                                    studentgroup == "MR" ~ 144,
+                                    studentgroup ==  "PI" ~ 79,
+                                    studentgroup ==  "RFP" ~ 8,
+                                    #  SBA ~
+                                    studentgroup ==  "SED" ~ 31,
+                                    studentgroup ==  "SWD" ~ 128,
+                                    studentgroup ==  "WH"  ~ 80)
+    )  %>%
+    mutate(Subgroup_ID = as.character(Subgroup_ID)) %>%
+    select(cds, countyname:schoolname, studentgroup, Test_Id ,currdenom, currstatus, statuslevel, definition, Subgroup_ID)
+
+
+
+
+dash.ela.prior <- tbl(con, "DASH_ELA") %>% 
+    filter(countyname == "Monterey",
+           # DistrictCode == "10272",
+           reportingyear >= yr.prior) %>%
+    #    head(100) %>%
+    collect() %>%
+    left_join_codebook("DASH_ELA", "studentgroup") %>%
+    mutate(Test_Id = 1,
+           Subgroup_ID =  case_when(studentgroup ==  "AA" ~ 74,
+                                    studentgroup == "AI" ~ 75,
+                                    studentgroup == "ALL" ~ 1,
+                                    studentgroup == "AS" ~ 76,
+                                    #  CAA ~ 
+                                    studentgroup == "EL" ~ 160,
+                                    #   ELO ~ 160, # combine
+                                    studentgroup == "EO" ~ 180,
+                                    studentgroup == "FI" ~ 77,
+                                    studentgroup ==  "FOS" ~ 240,
+                                    studentgroup ==  "HI" ~ 78,
+                                    studentgroup ==  "HOM" ~ 52,
+                                    studentgroup == "MR" ~ 144,
+                                    studentgroup ==  "PI" ~ 79,
+                                    studentgroup ==  "RFP" ~ 8,
+                                    #  SBA ~
+                                    studentgroup ==  "SED" ~ 31,
+                                    studentgroup ==  "SWD" ~ 128,
+                                    studentgroup ==  "WH"  ~ 80)
+    )  %>%
+    mutate(Subgroup_ID = as.character(Subgroup_ID)) %>%
+    select(cds, countyname:schoolname, studentgroup, Test_Id ,currdenom, currstatus, statuslevel, definition, Subgroup_ID)
+
+
+dash.prior <- bind_rows(dash.ela.prior,dash.math.prior)
+
+
+# Pulls new estimates with prior yera dashboard to make change estimates 
+
+joint <- left_join(temp, dash.prior) %>%
+    mutate(change = meanDFS - currstatus) %>%
+    filter(!is.na(meanDFS)) %>%
+    select(Test_Id, District_Name, School_Name, Subgroup, meanDFS, change)
+
+
+
+
+
+
+
+
+### Older for 2019 --------
+
+# Saving for archive purposes, but don't think it is relevant anymore.
+
+
 
 ### Math -------
 
@@ -158,6 +303,9 @@ ggplot(joint.2019.ela, aes(x= currstatus, y = Percentage_Standard_Met_and_Above)
     geom_point()+
     theme_clean()
 
+
+#### Modeling Percent Met/Exceeded with Distance from Standard -----
+
 model.ela <- lm(data = joint.2019.ela,
                  currstatus ~ Percentage_Standard_Met_and_Above + Percentage_Standard_Not_Met)
 
@@ -183,7 +331,7 @@ ggplot(joint.2019.pred.ela, aes(x= pred, y = currstatus)) +
 
 
 
-### Predictions ------
+### Predictions in fall 2022 ------
 
 
 caaspp.mry.pred.math <- caaspp.mry %>%
@@ -259,7 +407,7 @@ sheet_write(ss = ss,
 
 
 
-#  How many in 2019 where eligible just based on CAASPP?
+#  How many in 2019 were eligible just based on CAASPP?
 
 math.2019 <- dash.2019 %>%
     filter(statuslevel %in% c(1,2),
@@ -290,3 +438,7 @@ eligible.2019 <- full_join(math.2019, ela.2019) %>%
 sheet_write(ss = ss,
             eligible.2019)
 
+
+
+
+#### End ------

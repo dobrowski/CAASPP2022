@@ -9,6 +9,9 @@ library(here)
 library(ggthemes)
 library(vroom)
 library(ggrepel)
+library(readxl)
+library(ggtext)
+library(scales)
 
 yr.curr <- 2023
 

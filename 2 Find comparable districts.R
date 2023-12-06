@@ -14,15 +14,15 @@ SoMoCo <- udp.with.perc %>%
 
 udp.comp <- udp.with.perc %>%
     filter(# district_type == "High School District",
-           high_grade == "12",
-           el.perc >= .10,
-           frpm.perc >= .80,
+           high_grade == "8",
+           el.perc >= .40,
+           frpm.perc >= .85,
            charter_school_y_n == "N",
            str_detect(school_type,"Public"),
-           total_enrollment >= 2000
+           total_enrollment <= 200
            )
 
-
+write_csv(udp.comp, "San Lucas Comparison Schools.csv")
 
 
 

@@ -237,7 +237,10 @@ lolli.subgroups("South Monterey County", 1)
 lolli.subgroups("Soledad", 2)
 
 
-districts<- "Spreckels"
+
+
+
+districts<- "Greenfield"
 
 for (i in 1:2) {
     for (j in districts) {
@@ -341,6 +344,9 @@ lolli.subgroups.school("South Monterey", "Greenfield", 1)
 
 lolli.subgroups.school("South Monterey", "Greenfield", 2)
 
+lolli.subgroups.school("Salinas Union", "^Salinas High", 1)
+
+lolli.subgroups.school("Salinas Union", "^Salinas High", 2)
 
 caaspp.mry %>%
     filter(Grade == 13,
@@ -536,7 +542,7 @@ ggsave(here("figs", paste0(dist, " ", test.name,  " Rates by School ",  Sys.Date
 lolli.schools("Gonzales", 1)
 
 
-lolli.schools("Alisal", 1)
+lolli.schools("Greenfield", 1)
 
 
 
@@ -546,8 +552,7 @@ for (i in 1:2) {
         lolli.schools(j, i)
         
     }
-    
-    
+
 }
 
 
@@ -735,7 +740,7 @@ compare.years <- function(df,collie, test.id = 1, title.name, kular = "steel blu
         ) 
     
    ggsave(here("figs", paste0(title.name, " ", test.name,  " Change in Rates by Student Group ",  Sys.Date(),".png" )),
-          width = 8, height = 8)
+          width = 8, height = 4.5)
     
 }
 
@@ -792,12 +797,13 @@ dist.hold <- caaspp.mry %>%
             !is.na(Percentage_Standard_Met_and_Above),
        Subgroup_ID %notin% c(121, 190, 200, 201, 202, 203, 204, 205, 206, 207, 220, 221, 222, 223, 224, 225, 226, 227, 250, 251, 252)
     ) 
-    
 
-tabyl.set <- dist.hold %>% 
+
+tabyl.set <- dist.hold %>%
     tabyl(Subgroup_ID) %>%
     filter(n != 2)
 
+tabyl.set
 
 purge.list <- tabyl.set  %>%
     select(Subgroup_ID)  %>%
@@ -821,6 +827,7 @@ compare.years.dist.group(dist = "Chualar", testy = 1, kular = "Pink")
 compare.years.dist.group(dist = "South Monterey County", testy = 1, kular = "DarkMagenta")
 
 
+compare.years.dist.group(dist = "Greenfield", testy = 2, kular = "Limegreen") # #007937ff
 
 
 # 
